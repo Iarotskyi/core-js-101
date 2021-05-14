@@ -20,8 +20,10 @@
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-function Rectangle(/* width, height */) {
-  throw new Error('Not implemented');
+function Rectangle(width, height) {
+  this.width = width;
+  this.height = height;
+  this.getArea = () => width * height;
 }
 
 
@@ -35,8 +37,8 @@ function Rectangle(/* width, height */) {
  *    [1,2,3]   =>  '[1,2,3]'
  *    { width: 10, height : 20 } => '{"height":10,"width":20}'
  */
-function getJSON(/* obj */) {
-  throw new Error('Not implemented');
+function getJSON(obj) {
+  return JSON.stringify(obj);
 }
 
 
@@ -51,8 +53,10 @@ function getJSON(/* obj */) {
  *    const r = fromJSON(Circle.prototype, '{"radius":10}');
  *
  */
-function fromJSON(/* proto, json */) {
-  throw new Error('Not implemented');
+function fromJSON(proto, json) {
+  const obj = JSON.parse(json);
+  const values = Object.values(obj);
+  return new proto.constructor(...values);
 }
 
 
@@ -111,32 +115,96 @@ function fromJSON(/* proto, json */) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  output: '',
+  isElementCalled: false,
+  isIdCalled: false,
+  isPseudoElementCalled: false,
+  orderChecker: 0,
+
+  element(value) {
+    const innerObj = Object.create(cssSelectorBuilder);
+    if (this.orderChecker > 0) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    innerObj.orderChecker = 0;
+    if (this.isElementCalled) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    innerObj.isElementCalled = true;
+    innerObj.output += `${this.output}${value}`;
+    return innerObj;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    const innerObj = Object.create(cssSelectorBuilder);
+    if (this.orderChecker > 1) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    innerObj.orderChecker = 1;
+    if (this.isIdCalled) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    innerObj.isIdCalled = true;
+    innerObj.output += `${this.output}#${value}`;
+    return innerObj;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    const innerObj = Object.create(cssSelectorBuilder);
+    if (this.orderChecker > 2) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    innerObj.orderChecker = 2;
+    innerObj.output += `${this.output}.${value}`;
+    return innerObj;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    const innerObj = Object.create(cssSelectorBuilder);
+    if (this.orderChecker > 3) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    innerObj.orderChecker = 3;
+    innerObj.output += `${this.output}[${value}]`;
+    return innerObj;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    const innerObj = Object.create(cssSelectorBuilder);
+    if (this.orderChecker > 4) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    innerObj.orderChecker = 4;
+    innerObj.output += `${this.output}:${value}`;
+    return innerObj;
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    const innerObj = Object.create(cssSelectorBuilder);
+    if (this.orderChecker > 5) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    innerObj.orderChecker = 5;
+    if (this.isPseudoElementCalled) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    innerObj.isPseudoElementCalled = true;
+    innerObj.output += `${this.output}::${value}`;
+    return innerObj;
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    const innerObj = Object.create(cssSelectorBuilder);
+    innerObj.output = `${selector1.output} ${combinator} ${selector2.output}`;
+    return innerObj;
+  },
+
+  stringify() {
+    cssSelectorBuilder.orderChecker = 0;
+    cssSelectorBuilder.isElementCalled = false;
+    cssSelectorBuilder.isIdCalled = false;
+    cssSelectorBuilder.isPseudoElementCalled = false;
+    return this.output;
   },
 };
 
