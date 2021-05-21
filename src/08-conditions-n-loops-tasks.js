@@ -347,6 +347,7 @@ function getDigitalRoot(num) {
 function isBracketsBalanced(str) {
   const bracket = ['[', ']', '(', ')', '{', '}', '<', '>'];
   const strToArray = str.split('');
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     if (strToArray.length === 0) return true;
     for (let i = 0; i < strToArray.length; i += 1) {

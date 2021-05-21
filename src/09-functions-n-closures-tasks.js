@@ -84,7 +84,7 @@ function getPolynom(...constants) {
  */
 function memoize(func) {
   const memo = {};
-  return function (...args) {
+  return (...args) => {
     if (JSON.stringify(args) in memo) return memo[JSON.stringify(args)];
     memo[JSON.stringify(args)] = func.apply(this, args);
     return memo[JSON.stringify(args)];
